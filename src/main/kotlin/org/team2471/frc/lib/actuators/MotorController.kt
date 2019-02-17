@@ -40,6 +40,17 @@ class MotorController(deviceId: MotorControllerID, vararg followerIds: MotorCont
             return ctreMotorController.outputCurrent
         }
 
+    val currentSum: Double
+        get() {
+            if (followers.any { it !is CTRETalonSRX }) {
+                throw IllegalStateException("Current can only be read from talons")
+            }
+
+            return current + followers.fold(0.0) { acc, motorController ->
+                acc + (motorController as CTRETalonSRX).outputCurrent
+            }
+        }
+
     val velocity: Double
         get() = ctreMotorController.getSelectedSensorVelocity(0) * feedbackCoefficient * 10.0
 
